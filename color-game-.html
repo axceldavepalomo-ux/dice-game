@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #faece7;
+      color: #222;
+    }
+
+    .game {
+      width: 90%;
+      max-width: 440px;
+      padding: 32px 24px;
+      text-align: center;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+    }
+
+    .sub {
+      margin: 0 0 16px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .points {
+      margin: 0 0 16px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .choices {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .swatch {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .swatch.selected {
+      border: 3px solid #222;
+    }
+
+    .dice {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .die {
+      width: 70px;
+      height: 70px;
+      background: #d3d1c7;
+      border: 2px solid #999;
+      border-radius: 12px;
+    }
+
+    .message {
+      min-height: 24px;
+      margin: 0 0 16px;
+      font-size: 15px;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #roll {
+      border: 1px solid #993c1d;
+      background: #993c1d;
+      color: #ffffff;
+    }
+
+    #roll:hover {
+      background: #712b13;
+    }
+
+    .reset {
+      margin-left: 8px;
+      border: 1px solid #993c1d;
+      background: #ffffff;
+      color: #993c1d;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="game">
+    <h1>Color Game</h1>
+    <p class="sub">Pick a color, then roll the three dice. You win when your color shows up!</p>
+
+    <p class="points">Points: <span id="points">10</span></p>
+
+    <div id="choices" class="choices"></div>
+
+    <div class="dice">
+      <div class="die" id="d0"></div>
+      <div class="die" id="d1"></div>
+      <div class="die" id="d2"></div>
+    </div>
+
+    <p id="message" class="message">Pick a color to start.</p>
+
+    <button id="roll">Roll the dice</button>
+    <button id="reset" class="reset">Start over</button>
+  </main>
+
+  <script>
+    var colors = [
+      { name: "Red", hex: "#e24b4a" },
+      { name: "Blue", hex: "#378add" },
+      { name: "Green", hex: "#639922" },
+      { name: "Yellow", hex: "#ef9f27" },
+      { name: "Pink", hex: "#d4537e" },
+      { name: "White", hex: "#ffffff" }
+    ];
+
+    var points = 10;
+    var selected = null;
+
+    var choicesEl = document.getElementById("choices");
+    var pointsEl = document.getElementById("points");
+    var message = document.getElementById("message");
+
+    colors.forEach(function (c, i) {
+      var b = document.createElement("button");
+      b.className = "swatch";
+      b.style.background = c.hex;
+      b.title = c.name;
+      b.setAttribute("aria-label", c.name);
+      b.addEventListener("click", function () {
+        selected = i;
+        var all = choicesEl.children;
+        for (var j = 0; j < all.length; j++) {
+          all[j].classList.remove("selected");
+        }
+        b.classList.add("selected");
+        message.textContent = "You picked " + c.name + ". Roll the dice!";
+      });
+      choicesEl.appendChild(b);
+    });
+
+    document.getElementById("roll").addEventListener("click", function () {
+      if (selected === null) {
+        message.textContent = "Pick a color first.";
+        return;
+      }
+      if (points <= 0) {
+        message.textContent = "You're out of points. Press Start over.";
+        return;
+      }
+      var matches = 0;
+      for (var i = 0; i < 3; i++) {
+        var r = Math.floor(Math.random() * 6);
+        document.getElementById("d" + i).style.background = colors[r].hex;
+        if (r === selected) matches++;
+      }
+      if (matches > 0) {
+        points += matches;
+        message.textContent = "You win! " + colors[selected].name + " showed up " + matches + " time(s). +" + matches + " points";
+      } else {
+        points -= 1;
+        message.textContent = "You lose. " + colors[selected].name + " didn't show up. -1 point";
+      }
+      pointsEl.textContent = points;
+    });
+
+    document.getElementById("reset").addEventListener("click", function () {
+      points = 10;
+      selected = null;
+      pointsEl.textContent = points;
+      message.textContent = "Pick a color to start.";
+      for (var i = 0; i < 3; i++) {
+        document.getElementById("d" + i).style.background = "#d3d1c7";
+      }
+      var all = choicesEl.children;
+      for (var j = 0; j < all.length; j++) {
+        all[j].classList.remove("selected");
+      }
+    });
+  </script>
+
+</body>
+</html>
